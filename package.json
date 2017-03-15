@@ -1,0 +1,27 @@
+{
+  "name": "soundcloud-stats-slackbot",
+  "version": "1.0.0",
+  "description": "A Slack App that will crawl a specific Soundcloud User and post stats of how their tracks are doing into a channel.",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node --presets es2015 index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "soundcloud",
+    "slack",
+    "bot",
+    "stats"
+  ],
+  "author": "Augustus Yuan",
+  "license": "MIT",
+  "devDependencies": {
+    "@slack/client": "^3.9.0",
+    "babel-cli": "^6.24.0",
+    "babel-plugin-transform-async-to-generator": "^6.22.0",
+    "babel-preset-es2015": "^6.24.0",
+    "babel-preset-stage-0": "^6.22.0",
+    "moment": "^2.17.1",
+    "request": "^2.81.0"
+  }
+}
