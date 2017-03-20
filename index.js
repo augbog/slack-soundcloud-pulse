@@ -9,7 +9,7 @@ import { IncomingWebhook } from '@slack/client';
 import parallel from 'async/parallel';
 import request from 'request';
 import moment from 'moment';
-import config from './config.json';
+import config from './config';
 
 const webhook = new IncomingWebhook(config.SLACK_WEBHOOK_URL);
 const TRACKS_API_ENDPOINT = `https://api-v2.soundcloud.com/users/${config.SOUNDCLOUD_USER_ID}/tracks`;
@@ -153,6 +153,7 @@ function generateMessage(user, totalTracksInfo) {
 }
 
 function sendMessage(user, totalTracksInfo) {
+  console.log('Generating message for sending off...');
   webhook.send(generateMessage(user, totalTracksInfo), (err, res) => {
     if (err) {
       console.log(`Error sending totals`);
@@ -164,7 +165,6 @@ function sendMessage(user, totalTracksInfo) {
 // https://www.bennadel.com/blog/3201-exploring-recursive-promises-in-javascript.htm
 function fetchTrackTotals(requestOptions, totals, cb) {
   if (!requestOptions) {
-    console.log('No requestUrl specified so sending message');
     cb(null, totals);
   } else {
     console.log(`Making request to ${requestOptions.url}`);

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "babel-node --presets es2015 index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=test babel-node --presets es2015 index.js"
   },
   "keywords": [
     "soundcloud",

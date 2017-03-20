@@ -5,7 +5,7 @@ A Slack App that will crawl a specific Soundcloud User and post stats of how the
 
 ## Set up
 
-1. Create `config.json` and supply these values
+1. Create `config.json` in `config/` and supply these values. You can also duplicate and create a `config.test.json` if you wish to test into a different webhook.
 
 ```
 {
