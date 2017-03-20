@@ -6,7 +6,6 @@
  */
 
 import { IncomingWebhook } from '@slack/client';
-import parallel from 'async/parallel';
 import request from 'request';
 import moment from 'moment';
 import config from './config';
@@ -163,39 +162,45 @@ function sendMessage(user, totalTracksInfo) {
 
 // TODO: Look into recursive promises
 // https://www.bennadel.com/blog/3201-exploring-recursive-promises-in-javascript.htm
-function fetchTrackTotals(requestOptions, totals, cb) {
+function fetchTrackTotals(requestOptions, totals) {
   if (!requestOptions) {
-    cb(null, totals);
+    return new Promise((resolve, reject) => {
+      resolve(totals);
+    });
   } else {
     console.log(`Making request to ${requestOptions.url}`);
-    request(requestOptions, (err, res, body) => {
-      if (err) {
-        rej(`Failed to make request for Soundcloud data ${err}`);
-      }
-      if (body) {
-        const responseJSON = JSON.parse(body);
-        const { collection } = responseJSON;
-        totals = updateTotalsFromTracks(collection, totals);
-        if (responseJSON.next_href) {
-          let NEXT_REQUEST_OPTIONS = REQUEST_OPTIONS;
-          NEXT_REQUEST_OPTIONS.url = `${responseJSON.next_href}&${API_ENDPOINT_OPTIONS}`;
-          fetchTrackTotals(NEXT_REQUEST_OPTIONS, totals, cb);
-        } else {
-          fetchTrackTotals(false, totals, cb);
+    return new Promise((resolve, reject) => {
+      request(requestOptions, (err, res, body) => {
+        if (err) {
+          reject(`Failed to make request for Soundcloud data ${err}`);
         }
-      }
+        if (body) {
+          const responseJSON = JSON.parse(body);
+          const { collection } = responseJSON;
+          totals = updateTotalsFromTracks(collection, totals);
+          if (responseJSON.next_href) {
+            let NEXT_REQUEST_OPTIONS = REQUEST_OPTIONS;
+            NEXT_REQUEST_OPTIONS.url = `${responseJSON.next_href}&${API_ENDPOINT_OPTIONS}`;
+            resolve(fetchTrackTotals(NEXT_REQUEST_OPTIONS, totals));
+          } else {
+            resolve(fetchTrackTotals(false, totals));
+          }
+        }
+      });
     });
   }
 };
 
-function fetchUserInfo(requestOptions, cb) {
+function fetchUserInfo(requestOptions) {
   console.log(`Making request to ${requestOptions.url}`);
-  request(requestOptions, (err, res, body) => {
-    if (err) {
-      reject(`Failed to make request for Soundcloud data ${err}`);
-    }
-    const user = JSON.parse(body);
-    cb(null, user);
+  return new Promise((resolve, reject) => {
+    request(requestOptions, (err, res, body) => {
+      if (err) {
+        reject(`Failed to make request for Soundcloud data ${err}`);
+      }
+      const user = JSON.parse(body);
+      resolve(user);
+    });
   });
 }
 
@@ -208,14 +213,17 @@ function execute() {
     top_played: []
   };
 
-  parallel([
-    (cb) => {
-      fetchUserInfo(USER_REQUEST_OPTIONS, cb);
-    },
-    (cb) => {
-      fetchTrackTotals(TRACKS_REQUEST_OPTIONS, trackTotals, cb);
-    }
-  ], (err, results) => {
+  const userPromise = fetchUserInfo(USER_REQUEST_OPTIONS);
+  const tracksPromise =
+    fetchTrackTotals(TRACKS_REQUEST_OPTIONS, trackTotals)
+      .then((results) => {
+        return results;
+      })
+
+  Promise.all([
+    userPromise,
+    tracksPromise
+  ]).then((results) => {
     const user = results[0];
     const totalTracksInfo = results[1];
     sendMessage(user, totalTracksInfo);
