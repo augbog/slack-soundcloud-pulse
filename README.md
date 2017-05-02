@@ -20,6 +20,13 @@ A Slack App that will crawl a specific Soundcloud User and post stats of how the
 3. Set up your Webhook URL in your Slack team. You can do this by going to [Your Apps](https://api.slack.com/apps), creating a new App, and then adding a new Incoming Webhook.
 4. Run `npm install` in this repository.
 5. Assuming you have done all the steps above, run `npm run start` and you should send a Slack message to the channel you chose when setting up your Webhook URL above.
+6. If you wish to have this run on a weekly or monthly basis, you can set up a cron job and have it run the command. My crontab file looks like below and you can access via `crontab -e`
+
+```
+NODE_PATH=/home/pi/.npm/lib/node_modules
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+0 8 * * 1 /usr/local/bin/npm run --prefix /home/pi/slack-soundcloud-pulse >/dev/null 2>&1
+```
 
 
 ## Helpful links
