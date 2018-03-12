@@ -37,7 +37,9 @@ function updateTotals(track, totals) {
   let newTotals = totals;
   let { top_played } = newTotals;
   for (var key in totals) {
-    newTotals[key] = totals[key] + track[key];
+    if (key !== 'most_recent') {
+      newTotals[key] = totals[key] + track[key];
+    }
   };
 
   let hasTrackInTopPlayed = false;
@@ -74,6 +76,12 @@ function updateTotals(track, totals) {
 
 function updateTotalsFromTracks(tracks, currentTotals) {
   for (var i=0; i<tracks.length; i++) {
+    // very first track we process is always the most recent
+    if (i == 0 && currentTotals.most_recent.title == '') {
+      currentTotals.most_recent.title = tracks[i].title;
+      currentTotals.most_recent.playback_count = tracks[i].playback_count;
+      currentTotals.most_recent.created_at = tracks[i].created_at;
+    }
     currentTotals = updateTotals(tracks[i], currentTotals);
   }
   return currentTotals;
@@ -84,7 +92,8 @@ function generateMessage(user, totalTracksInfo) {
     likes_count,
     playback_count,
     reposts_count,
-    comment_count } = totalTracksInfo;
+    comment_count, 
+    most_recent } = totalTracksInfo;
 
   const {
     avatar_url,
@@ -102,6 +111,11 @@ function generateMessage(user, totalTracksInfo) {
   for (var i=0; i<sortedTopPlayed.length; i++) {
     top_played_Message += `${i+1}. ${sortedTopPlayed[i].title} (${sortedTopPlayed[i].playback_count})\n`;
   }
+
+  let most_recent_Message = `
+  ${most_recent.title} (${most_recent.playback_count})
+Released: ${moment(most_recent.created_at, "YYYYMMDD").fromNow()}
+  `;
 
   const messageObject = {
     "attachments": [
@@ -139,6 +153,11 @@ function generateMessage(user, totalTracksInfo) {
           {
             "title": "Most Played Tracks",
             "value": `${top_played_Message}`,
+            "short": false
+          },
+          {
+            "title": "Most Recent Track",
+            "value": `${most_recent_Message}`,
             "short": false
           }
         ],
@@ -210,7 +229,12 @@ function execute() {
     playback_count: 0,
     reposts_count: 0,
     comment_count: 0,
-    top_played: []
+    top_played: [],
+    most_recent: {
+      title: '',
+      playback_count: 0,
+      created_at: ''
+    }
   };
 
   const userPromise = fetchUserInfo(USER_REQUEST_OPTIONS);
