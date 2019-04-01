@@ -16,7 +16,10 @@ A Slack App that will crawl a specific Soundcloud User and post stats of how the
 }
 ```
 
-2. If you need help obtaining these values, go into the Network tab when you visit your Soundcloud profile and you should be able to find a request that makes such a call (filter by `api-v2.soundcloud.com`). These calls will have the parameters `client_id` and `app_version` passed.
+2. If you need help obtaining these values, go into the Network tab when you visit your Soundcloud profile and you should be able to find a request that makes such a call (filter by `api-v2.soundcloud.com`). These calls will have the parameters `client_id` and `app_version` passed. See the image below
+
+<img src="https://raw.githubusercontent.com/augbog/slack-soundcloud-pulse/master/request-example.png" alt="Network tab request images find client_id and app_version" />
+
 3. Set up your Webhook URL in your Slack team. You can do this by going to [Your Apps](https://api.slack.com/apps), creating a new App, and then adding a new Incoming Webhook.
 4. Run `npm install` in this repository.
 5. Assuming you have done all the steps above, run `npm run start` and you should send a Slack message to the channel you chose when setting up your Webhook URL above.
